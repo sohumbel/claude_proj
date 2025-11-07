@@ -1,7 +1,8 @@
 import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Upload, File, X } from "lucide-react";
+import { Upload, File, X, Flame } from "lucide-react";
 import { toast } from "sonner";
 
 interface UploadSectionProps {
@@ -11,6 +12,7 @@ interface UploadSectionProps {
 }
 
 export const UploadSection = ({ onFileUpload, uploadedFile, onRemoveFile }: UploadSectionProps) => {
+  const navigate = useNavigate();
   const [isDragging, setIsDragging] = useState(false);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
@@ -118,7 +120,7 @@ export const UploadSection = ({ onFileUpload, uploadedFile, onRemoveFile }: Uplo
             </div>
           </Card>
         ) : (
-          <Card className="p-8 border-primary/30 bg-card/50 backdrop-blur animate-scale-in">
+          <Card className="p-8 border-primary/30 bg-card/50 backdrop-blur animate-scale-in space-y-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-primary/10 rounded-lg">
@@ -139,6 +141,22 @@ export const UploadSection = ({ onFileUpload, uploadedFile, onRemoveFile }: Uplo
               >
                 <X className="w-5 h-5" />
               </Button>
+            </div>
+
+            {/* Generate Button */}
+            <div className="pt-4 border-t border-border">
+              <Button
+                variant="hero"
+                size="lg"
+                onClick={() => navigate("/generate")}
+                className="w-full text-lg"
+              >
+                <Flame className="w-5 h-5" />
+                Generate Roast Video
+              </Button>
+              <p className="text-center text-sm text-muted-foreground mt-3">
+                This will take approximately 30-60 seconds
+              </p>
             </div>
           </Card>
         )}
