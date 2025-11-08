@@ -5,12 +5,13 @@ import { UploadSection } from "@/components/UploadSection";
 const Index = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [showUpload, setShowUpload] = useState(false);
+  const [backgroundVideo, setBackgroundVideo] = useState<string>("subway_surfer");
 
   const handleGetStarted = () => {
     setShowUpload(true);
     // Smooth scroll to upload section
     setTimeout(() => {
-      document.getElementById("upload-section")?.scrollIntoView({ 
+      document.getElementById("upload-section")?.scrollIntoView({
         behavior: "smooth",
         block: "start"
       });
@@ -25,16 +26,22 @@ const Index = () => {
     setUploadedFile(null);
   };
 
+  const handleBackgroundChange = (background: string) => {
+    setBackgroundVideo(background);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Hero onGetStarted={handleGetStarted} />
       
       {showUpload && (
         <div id="upload-section">
-          <UploadSection 
+          <UploadSection
             onFileUpload={handleFileUpload}
             uploadedFile={uploadedFile}
             onRemoveFile={handleRemoveFile}
+            backgroundVideo={backgroundVideo}
+            onBackgroundChange={handleBackgroundChange}
           />
         </div>
       )}

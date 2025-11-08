@@ -12,13 +12,48 @@ export const ResultSection = ({ videoUrl, onReset }: ResultSectionProps) => {
   if (!videoUrl) return null;
 
   const handleDownload = () => {
+    if (!videoUrl) return;
+
+    // Create a temporary anchor element to trigger download
+    const link = document.createElement("a");
+    link.href = videoUrl;
+    link.download = "resume-roast.mp4";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
     toast.success("Download started!");
-    // Add actual download logic here
   };
 
-  const handleShare = () => {
-    toast.success("Link copied to clipboard!");
-    // Add actual share logic here
+  const handleShare = async () => {
+    if (!videoUrl) return;
+
+    const fullUrl = window.location.origin + videoUrl;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "My Resume Roast",
+          text: "Check out my resume roast video!",
+          url: fullUrl,
+        });
+        toast.success("Shared successfully!");
+      } catch (error) {
+        // User cancelled or share failed
+        copyToClipboard(fullUrl);
+      }
+    } else {
+      // Fallback to copying link
+      copyToClipboard(fullUrl);
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast.success("Link copied to clipboard!");
+    }).catch(() => {
+      toast.error("Failed to copy link");
+    });
   };
 
   return (
@@ -34,19 +69,17 @@ export const ResultSection = ({ videoUrl, onReset }: ResultSectionProps) => {
         </div>
 
         <Card className="p-8 space-y-8 border-primary/30 bg-card/50 backdrop-blur">
-          {/* Video Player Placeholder */}
-          <div className="relative aspect-video bg-muted rounded-lg overflow-hidden border-2 border-border">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center space-y-4">
-                <div className="text-6xl">🎥</div>
-                <p className="text-lg text-muted-foreground">
-                  Video Player Placeholder
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Your roast video would appear here
-                </p>
-              </div>
-            </div>
+          {/* Video Player */}
+          <div className="relative aspect-video bg-black rounded-lg overflow-hidden border-2 border-border">
+            <video
+              src={videoUrl}
+              controls
+              autoPlay
+              className="w-full h-full object-contain"
+              preload="metadata"
+            >
+              Your browser does not support the video tag.
+            </video>
           </div>
 
           {/* Action Buttons */}

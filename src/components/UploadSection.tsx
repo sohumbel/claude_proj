@@ -4,16 +4,26 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Upload, File, X, Flame } from "lucide-react";
 import { toast } from "sonner";
+import { uploadResume } from "@/lib/api";
 
 interface UploadSectionProps {
   onFileUpload: (file: File) => void;
   uploadedFile: File | null;
   onRemoveFile: () => void;
+  backgroundVideo: string;
+  onBackgroundChange: (background: string) => void;
 }
 
-export const UploadSection = ({ onFileUpload, uploadedFile, onRemoveFile }: UploadSectionProps) => {
+export const UploadSection = ({
+  onFileUpload,
+  uploadedFile,
+  onRemoveFile,
+  backgroundVideo,
+  onBackgroundChange
+}: UploadSectionProps) => {
   const navigate = useNavigate();
   const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -52,6 +62,29 @@ export const UploadSection = ({ onFileUpload, uploadedFile, onRemoveFile }: Uplo
       } else {
         toast.error("Please upload a PDF file");
       }
+    }
+  };
+
+  const handleGenerateRoast = async () => {
+    if (!uploadedFile) {
+      toast.error("No file uploaded");
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      // Upload file to backend with selected background video and get job_id
+      const response = await uploadResume(uploadedFile, backgroundVideo);
+
+      toast.success("Upload successful! Generating roast...");
+
+      // Navigate to generate page with job_id
+      navigate(`/generate?jobId=${response.job_id}`);
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to upload resume");
+      setIsUploading(false);
     }
   };
 
@@ -143,18 +176,43 @@ export const UploadSection = ({ onFileUpload, uploadedFile, onRemoveFile }: Uplo
               </Button>
             </div>
 
-            {/* Generate Button */}
-            <div className="pt-4 border-t border-border">
+            {/* Background Video Selector */}
+            <div className="pt-4 border-t border-border space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-3 block">
+                  Choose Brainrot Background:
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {["subway_surfer", "minecraft", "fortnite", "templerun", "satisfying"].map((bg) => (
+                    <button
+                      key={bg}
+                      onClick={() => onBackgroundChange(bg)}
+                      className={`p-3 rounded-lg border-2 transition-all ${
+                        backgroundVideo === bg
+                          ? "border-primary bg-primary/10"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <div className="text-sm font-medium capitalize">
+                        {bg.replace("_", " ")}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Generate Button */}
               <Button
                 variant="hero"
                 size="lg"
-                onClick={() => navigate("/generate")}
+                onClick={handleGenerateRoast}
+                disabled={isUploading}
                 className="w-full text-lg"
               >
                 <Flame className="w-5 h-5" />
-                Generate Roast Video
+                {isUploading ? "Uploading..." : "Generate Roast Video"}
               </Button>
-              <p className="text-center text-sm text-muted-foreground mt-3">
+              <p className="text-center text-sm text-muted-foreground">
                 This will take approximately 30-60 seconds
               </p>
             </div>
